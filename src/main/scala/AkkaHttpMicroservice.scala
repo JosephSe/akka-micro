@@ -23,3 +23,12 @@ object AkkaHttpMicroservice extends App with Service {
 
   Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
 }
+
+trait Service extends Protocols {
+  implicit val system: ActorSystem
+  implicit def executor: ExecutionContextExecutor
+  implicit val materializer: Materializer
+
+  def config: Config
+  val logger: LoggingAdapter
+}
