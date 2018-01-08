@@ -11,6 +11,8 @@ import spray.json.DefaultJsonProtocol
 
 case class IpInfo(query: String, country: Option[String], city: Option[String], lat: Option[Double], lon: Option[Double])
 
+case class IpPairSummary(distance: Option[Double], ip1Info: IpInfo, ip2Info: IpInfo)
+
 object AkkaHttpMicroservice extends App with Service {
   override implicit val system = ActorSystem()
   override implicit val executor = system.dispatcher
