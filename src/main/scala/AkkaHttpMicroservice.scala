@@ -31,4 +31,36 @@ trait Service extends Protocols {
 
   def config: Config
   val logger: LoggingAdapter
+
+  lazy val ipApiConnectionFlow: Flow[HttpRequest, HttpResponse, Any] =
+    Http().outgoingConnection(config.getString("services.ip-api.host"), config.getInt("services.ip-api.port"))
+
+  def ipApiRequest(request: HttpRequest): Future[HttpResponse] = Source.single(request).via(ipApiConnectionFlow).runWith(Sink.head)
+
+  val routes = {
+    logRequestResult("akka-http-microservice") {
+      pathPrefix("ip") {
+        (get & path(Segment)) { ip =>
+          complete {
+            fetchIpInfo(ip).map[ToResponseMarshallable] {
+              case Right(ipInfo) => ipInfo
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        } ~
+        (post & entity(as[IpPairSummaryRequest])) { ipPairSummaryRequest =>
+          complete {
+            val ip1InfoFuture = fetchIpInfo(ipPairSummaryRequest.ip1)
+            val ip2InfoFuture = fetchIpInfo(ipPairSummaryRequest.ip2)
+            ip1InfoFuture.zip(ip2InfoFuture).map[ToResponseMarshallable] {
+              case (Right(info1), Right(info2)) => IpPairSummary(info1, info2)
+              case (Left(errorMessage), _) => BadRequest -> errorMessage
+              case (_, Left(errorMessage)) => BadRequest -> errorMessage
+            }
+          }
+        }
+      }
+    }
+  }
+
 }
