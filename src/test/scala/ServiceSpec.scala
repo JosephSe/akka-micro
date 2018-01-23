@@ -38,4 +38,13 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
       responseAs[IpInfo] shouldBe ip2Info
     }
   }
+
+  it should "respond to IP pair query" in {
+    Post(s"/ip", IpPairSummaryRequest(ip1Info.query, ip2Info.query)) ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      responseAs[IpPairSummary] shouldBe ipPairSummary
+    }
+  }
+
 }
