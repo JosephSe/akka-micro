@@ -47,4 +47,11 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
     }
   }
 
+  it should "respond with bad request on incorrect IP format" in {
+    Get("/ip/asdfg") ~> routes ~> check {
+      status shouldBe BadRequest
+      responseAs[String].length should be > 0
+    }
+
+  }
 }
