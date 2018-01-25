@@ -53,5 +53,14 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
       responseAs[String].length should be > 0
     }
 
+    Post(s"/ip", IpPairSummaryRequest(ip1Info.query, "asdfg")) ~> routes ~> check {
+      status shouldBe BadRequest
+      responseAs[String].length should be > 0
+    }
+
+    Post(s"/ip", IpPairSummaryRequest("asdfg", ip1Info.query)) ~> routes ~> check {
+      status shouldBe BadRequest
+      responseAs[String].length should be > 0
+    }
   }
 }
